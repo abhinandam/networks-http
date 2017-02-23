@@ -19,7 +19,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define ECHO_PORT 9999
+#define ECHO_PORT 80
 #define BUF_SIZE 4096
 
 int close_socket(int sock)
@@ -85,8 +85,7 @@ int main(int argc, char* argv[])
 
        while((readret = recv(client_sock, buf, BUF_SIZE, 0)) >= 1)
        {
-           if (send(client_sock, buf, readret, 0) != readret)
-           {
+           if (send(client_sock, buf, readret, 0) != readret) {
                close_socket(client_sock);
                close_socket(sock);
                fprintf(stderr, "Error sending to client.\n");

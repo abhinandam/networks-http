@@ -1,16 +1,20 @@
 ################################################################################
 # Makefile                                                                     #
 #                                                                              #
-# Description: This file contains the make rules for Project 1.                #
+# Description: This file contains the make rules for Recitation 1.             #
 #                                                                              #
-# Authors: Evan Kesten <ebk46@cornell.edu>                                     #
+# Authors: Athula Balachandran <abalacha@cs.cmu.edu>,                          #
+#          Wolf Richter <wolf@cs.cmu.edu>                                      #
 #                                                                              #
 ################################################################################
 
-default: http_server
+default: echo_server echo_client
 
-http_server:
-	@gcc http_server.c -o http_server -Wall -Werror
+echo_server:
+	@gcc echo_server.c -o echo_server -Wall -Werror
+
+echo_client:
+	@gcc echo_client.c -o echo_client -Wall -Werror
 
 clean:
-	@rm http_server
+	@rm echo_server echo_client
