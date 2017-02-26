@@ -18,7 +18,7 @@
 #include <time.h>
 #include "request_handler.h"
 
-#define HTTP_PORT 9992
+#define HTTP_PORT 9999
 #define BUF_SIZE 8192
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -87,6 +87,10 @@ int main(int argc, char* argv[])
     addr.sin_family = AF_INET;
     addr.sin_port = htons(HTTP_PORT);
     addr.sin_addr.s_addr = INADDR_ANY;
+
+
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &(int){ 1 }, sizeof(int)) < 0)
+        write_to_log(logFile, "setsockopt(SO_REUSEADDR) failed.\n");
 
     /* servers bind sockets to ports---notify the OS they accept connections */
     if (bind(sock, (struct sockaddr *) &addr, sizeof(addr)))

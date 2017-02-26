@@ -5,6 +5,8 @@
 #ifndef RESPONSES_H
 #define RESPONSES_H
 
+char continue_100[] = "HTTP/1.1 100 Continue\r\n";
+
 char success_200[] = "HTTP/1.1 200 OK\r\n"
                      "Connection: Closed\r\n\r\n";
 
@@ -24,16 +26,17 @@ char error_501[] = "HTTP/1.1 501 Method Unimplemented\r\n"
                    "Connection: Closed\r\n\r\n";
 
 struct request {
+    int expContentLength;
+    int contentLength;
     char * method;
     char * relPath;
-    char * httpVer;
-    char * contentLength;
+    //char * httpVer;
     char * content;
-    char * expect;
+    //char * expect;
 };
 
 struct response {
-    char * contentLength;
+    int contentLength;
     char * contentType;
     char * content;
 };
