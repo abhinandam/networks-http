@@ -3,6 +3,6 @@ project(networks_http)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SERVER_SRC http_server.c responses.h)
+set(SERVER_SRC http_server.c responses.h request_handler.h request_handler.c)
 
 add_executable(http_server ${SERVER_SRC})
