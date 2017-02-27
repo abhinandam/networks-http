@@ -100,6 +100,7 @@ int client_send(int sock, int client_sock, struct response * resp) {
 }
 
 int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
+    int requestStarted = 0;
     struct request * req;
     req = malloc(sizeof(struct request));
     req->expContentLength = 0;
@@ -128,10 +129,11 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
     while (endRequest == 0) {
         int count;
         ioctl(client_sock, FIONREAD, &count);
-        if (count <= 0 && endHeader == 0) {
+        if (count <= 0 && endHeader == 0 && requestStarted == 0) {
             return 1;
         }
         if (count >= 1 && (readret = recv(client_sock, buf, BUF_SIZE, 0)) >= 1) {
+            requestStarted = 1;
             char *endBuf;
             // If the header is complete, collect content (across multiple buffers if need be)
             if (endHeader == 1) {
@@ -234,7 +236,7 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
                 memset(buf, '\0', BUF_SIZE);
             }
         } else {
-            if (req->expCont == 0) { // && req->expContentLength >= req->contentLength
+            if (req->expCont == 0 && endHeader == 1) { // && req->expContentLength >= req->contentLength
                 endRequest = 1;
             }
         }
@@ -273,7 +275,7 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
     } else if (access(resource_path, F_OK) == -1) {
         resp->contentTemplate = error_404;
     } else {
-        if (strcmp(req->method, "HEAD") == 0 || strcmp(req->method, "GET") == 0) {
+        if (req->method && (strcmp(req->method, "HEAD") == 0 || strcmp(req->method, "GET") == 0)) {
             FILE *fp = fopen(resource_path, "r");
             fseek(fp, 0, SEEK_END);
             long fsize = ftell(fp);
@@ -326,7 +328,7 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
                 strcpy(resp->content, file_buf);
             }
             free(file_buf);
-        } else if (strcmp(req->method, "POST") == 0) {
+        } else if (req->method && strcmp(req->method, "POST") == 0) {
             // TODO: DO "POST" ACTION
             /*while (contentLen != NULL && strlen(content) < contentLen) {
                 if (readret = recv(client_sock, buf, BUF_SIZE, 0) >= 1) {
