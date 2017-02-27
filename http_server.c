@@ -45,7 +45,7 @@ int write_to_log(FILE *logFile, char *message) {
 int main(int argc, char* argv[])
 {
     int HTTP_PORT = atoi(argv[1]);
-    int TLS_PORT = atoi(argv[2]);
+    //int TLS_PORT = atoi(argv[2]);
     char * LOG_DIR = argv[3];
 
     char cwd[1024];
