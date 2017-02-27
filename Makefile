@@ -7,10 +7,10 @@
 #                                                                              #
 ################################################################################
 
-default: http_server
+default: lisod
 
-http_server:
-	@gcc http_server.c -o http_server -Wall -Werror
+lisod:
+	@gcc -o lisod request_handler.c responses.h http_server.c -Wall -Werror
 
 clean:
-	@rm http_server
+	@rm lisod

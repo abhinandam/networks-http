@@ -62,7 +62,6 @@ int main(int argc, char* argv[])
 
 
     int sock, client_sock;
-    ssize_t readret;
     socklen_t cli_size;
     struct sockaddr_in addr, cli_addr;
     char buf[BUF_SIZE];
