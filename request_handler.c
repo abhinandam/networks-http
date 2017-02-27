@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include "request_handler.h"
 #include "responses.h"
+#include "logger.c"
 
 void convertToUpperCase(char *sPtr) {
     while(*sPtr != '\0') {
@@ -48,8 +49,8 @@ int client_send(int sock, int client_sock, struct response * resp) {
         respLength += resp->contentLength;
     }
     //if (resp->contentLength != 0) {
-        sprintf(contentLengthStr, "%d", (int)resp->contentLength);
-        respLength += strlen(contentLengthLabel) + strlen(contentLengthStr) + 2;
+    sprintf(contentLengthStr, "%d", (int)resp->contentLength);
+    respLength += strlen(contentLengthLabel) + strlen(contentLengthStr) + 2;
     //}
     if (resp->contentType != NULL) {
         respLength += strlen(contentTypeLabel) + strlen(resp->contentType) + 2;
@@ -67,9 +68,9 @@ int client_send(int sock, int client_sock, struct response * resp) {
     strcat(responseStr, "\r\n");
 
     //if (resp->contentLength != 0) {
-        strcat(responseStr, contentLengthLabel);
-        strcat(responseStr, contentLengthStr);
-        strcat(responseStr, "\r\n");
+    strcat(responseStr, contentLengthLabel);
+    strcat(responseStr, contentLengthStr);
+    strcat(responseStr, "\r\n");
     //}
     if (resp->contentType != NULL) {
         strcat(responseStr, contentTypeLabel);
@@ -88,6 +89,8 @@ int client_send(int sock, int client_sock, struct response * resp) {
     }
 
     strcat(responseStr, "\r\n");
+    fprintf(logFile,"%s", responseStr);
+
     //printf("%s", responseStr);
     resp->contentTemplate = success_200;
     if (send(client_sock, responseStr, respLength, 0) != respLength) {
@@ -155,7 +158,7 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
                         req->expCont = 0;
                     }
                 }
-            // If the header is not complete, parse it before moving onto the data
+                // If the header is not complete, parse it before moving onto the data
             } else {
                 char *line = strtok_r(buf, "\r\n", &endBuf);
                 while (line != NULL) {
@@ -197,7 +200,7 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
                         }
 
                         if (strcmp(tok, "100-continue") == 0) {
-                        //if (req->method != NULL && strcmp(req->method, "POST") == 0) {
+                            //if (req->method != NULL && strcmp(req->method, "POST") == 0) {
                             req->expCont = 1;
                         }
 
@@ -335,6 +338,7 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
             }*/
             printf("\nSTART-CONTENT\n");
             printf("%s", req->content);
+            fprintf(logFile, "%s", req->content);
             printf("\nEND-CONTENT\n");
 
             /*FILE *fp;
@@ -368,6 +372,4 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
         return 1;
     }
 }
-
-
 
