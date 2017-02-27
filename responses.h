@@ -7,30 +7,40 @@
 
 #include <stdlib.h>
 
-char continue_100[] = "HTTP/1.1 100 Continue\r\n";
+char continue_100[] = "HTTP/1.1 100 Continue\r\n"
+                      "Server: liso/1.0\r\n";
 
 char success_200[] = "HTTP/1.1 200 OK\r\n"
-                     "Connection: close\r\n";
+                     "Connection: close\r\n"
+                     "Server: liso/1.0\r\n";
 
 char error_400[] = "HTTP/1.1 400 Bad Request\r\n"
-                   "Connection: close\r\n";
+                   "Connection: close\r\n"
+                   "Server: liso/1.0\r\n";
 
 char error_401[] = "HTTP/1.1 401 Unauthorized\r\n"
-                   "Connection: close\r\n";
+                   "Connection: close\r\n"
+                   "Server: liso/1.0\r\n";
 
 char error_403[] = "HTTP/1.1 403 Forbidden\r\n"
-                   "Connection: close\r\n";
+                   "Connection: close\r\n"
+                   "Server: liso/1.0\r\n";
 
 char error_404[] = "HTTP/1.1 404 Not Found\r\n"
-                   "Connection: close\r\n";
+                   "Connection: close\r\n"
+                   "Server: liso/1.0\r\n";
 
 char error_411[] = "HTTP/1.1 411 Length Required\r\n"
-                   "Connection: close\r\n";
+                   "Connection: close\r\n"
+                   "Server: liso/1.0\r\n";
 
 char error_501[] = "HTTP/1.1 501 Method Unimplemented\r\n"
-                   "Connection: close\r\n";
+                   "Connection: close\r\n"
+                   "Server: liso/1.0\r\n";
 
 char contentLengthLabel[] = "Content-Length: ";
 char contentTypeLabel[] = "Content-Type: ";
+char dateLabel[] = "Date: ";
+char lastModLabel[] = "Last-Modified: ";
 
 #endif //RESPONSES_H

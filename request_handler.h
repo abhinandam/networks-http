@@ -20,11 +20,10 @@ struct response {
     char * contentTemplate;
     char * contentType;
     char * content;
+    char * lastMod;
 };
 
 int close_socket(int sock);
-
-int client_send(int sock, int client_sock, struct response * resp);
 
 int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE);
 

@@ -8,9 +8,10 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <ctype.h>
+#include <time.h>
+#include <sys/stat.h>
 #include "request_handler.h"
 #include "responses.h"
-
 
 void convertToUpperCase(char *sPtr) {
     while(*sPtr != '\0') {
@@ -32,6 +33,17 @@ int client_send(int sock, int client_sock, struct response * resp) {
     char * responseStr;
     char contentLengthStr[20] = "";
     size_t respLength = strlen(resp->contentTemplate) + 2;
+
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    char * dateStr = asctime(timeinfo);
+    dateStr[strlen(dateStr) - 1] = '\0';
+    respLength += strlen(dateLabel) + strlen(dateStr) + 2;
+
     if (resp->content != NULL) {
         respLength += resp->contentLength;
     }
@@ -43,8 +55,17 @@ int client_send(int sock, int client_sock, struct response * resp) {
         respLength += strlen(contentTypeLabel) + strlen(resp->contentType) + 2;
     }
 
+    if (resp->lastMod != NULL) {
+        respLength += strlen(lastModLabel) + strlen(resp->lastMod) + 2;
+    }
+
     responseStr = malloc(respLength);
     strcpy(responseStr, resp->contentTemplate);
+
+    strcat(responseStr, dateLabel);
+    strcat(responseStr, dateStr);
+    strcat(responseStr, "\r\n");
+
     //if (resp->contentLength != 0) {
         strcat(responseStr, contentLengthLabel);
         strcat(responseStr, contentLengthStr);
@@ -55,10 +76,17 @@ int client_send(int sock, int client_sock, struct response * resp) {
         strcat(responseStr, resp->contentType);
         strcat(responseStr, "\r\n");
     }
+    if (resp->lastMod != NULL) {
+        strcat(responseStr, lastModLabel);
+        strcat(responseStr, resp->lastMod);
+        strcat(responseStr, "\r\n");
+    }
+
     if (resp->content != NULL) {
         strcat(responseStr, "\r\n");
         strcat(responseStr, resp->content);
     }
+
     strcat(responseStr, "\r\n");
     //printf("%s", responseStr);
     resp->contentTemplate = success_200;
@@ -87,6 +115,7 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
     resp->content = NULL;
     resp->contentTemplate = success_200;
     resp->contentType = NULL;
+    resp->lastMod = NULL;
 
     ssize_t readret = 0;
     int endHeader = 0;
@@ -253,6 +282,42 @@ int parseRequest(int sock, int client_sock, char * buf, size_t BUF_SIZE) {
             char *file_buf = malloc((size_t)fsize + 1);
             fread(file_buf, (size_t)fsize, 1, fp);
             fclose(fp);
+
+            // get modified time
+            struct stat attr;
+            stat(resource_path, &attr);
+
+            // save last modified time to string
+            char modtimebuf[200];
+            time_t modified_time = attr.st_mtime;
+            struct tm tmx = *gmtime(&modified_time);
+            strftime(modtimebuf, sizeof(modtimebuf), "%a, %d %b %Y %H:%M:%S %Z", &tmx);
+
+            resp->lastMod = malloc(strlen(modtimebuf));
+            strcpy(resp->lastMod, modtimebuf);
+
+            char type[50] = "application/octet-stream";
+
+            char * ext = strrchr(req->relPath, '.');
+            if (ext) {
+                ext++;
+                if (strcmp(ext, "html") == 0) {
+                    strcpy(type, "text/html");
+                } else if (strcmp(ext, "css") == 0) {
+                    strcpy(type, "text/css");
+                } else if (strcmp(ext, "txt") == 0) {
+                    strcpy(type, "text/plain");
+                } else if (strcmp(ext, "png") == 0) {
+                    strcpy(type, "image/png");
+                } else if (strcmp(ext, "jpeg") == 0) {
+                    strcpy(type, "image/jpeg");
+                } else if (strcmp(ext, "gif") == 0) {
+                    strcpy(type, "image/gif");
+                }
+            }
+
+            resp->contentType = malloc(strlen(type) + 1);
+            strcpy(resp->contentType, type);
 
             resp->contentLength = (size_t)fsize;
 
