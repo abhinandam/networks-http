@@ -18,7 +18,6 @@
 #include <time.h>
 #include "request_handler.h"
 
-#define HTTP_PORT 9999
 #define BUF_SIZE 8192
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -45,12 +44,16 @@ int write_to_log(FILE *logFile, char *message) {
 
 int main(int argc, char* argv[])
 {
+    int HTTP_PORT = atoi(argv[1]);
+    int TLS_PORT = atoi(argv[2]);
+    char * LOG_DIR = argv[3];
+
     char cwd[1024];
     getcwd(cwd, sizeof(cwd));
     printf("Running in: %s\n", cwd);
 
     FILE *logFile;
-    logFile = fopen("select_server.log", "w");
+    logFile = fopen(LOG_DIR, "w");
     if (logFile == NULL) {
         /* Something is wrong   */
         fprintf(stdout, "Error opening logfile. \n");
